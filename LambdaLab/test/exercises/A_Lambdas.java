@@ -1,17 +1,16 @@
 package exercises;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.BiFunction;
+import org.junit.Ignore;
+import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-
-import org.junit.Ignore;
-import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -30,9 +29,9 @@ public class A_Lambdas {
      * Write a lambda expression that is a predicate
      * that tests whether a string is longer than four characters.
      */
-    @Test @Ignore
+    @Test
     public void a_predicate1() {
-        Predicate<String> pred = null; // TODO
+        Predicate<String> pred = s -> s.length() > 4;
 
         assertTrue(pred.test("abcde"));
         assertFalse(pred.test("abcd"));
@@ -42,9 +41,9 @@ public class A_Lambdas {
      * Write a lambda expression that is a predicate
      * that tests whether a string is empty.
      */
-    @Test @Ignore
+    @Test
     public void a_predicate2() {
-        Predicate<String> pred = null; // TODO
+        Predicate<String> pred = s -> s.isEmpty();
 
         assertTrue(pred.test(""));
         assertFalse(pred.test("a"));
@@ -58,13 +57,18 @@ public class A_Lambdas {
      *
      *     classname::methodname
      */
-    @Test @Ignore
+    @Test
     public void a_predicate3() {
-        Predicate<String> pred = null; // TODO
+        Predicate<String> pred = A_Lambdas::stringIsEmpty;
 
         assertTrue(pred.test(""));
         assertFalse(pred.test("a"));
     }
+
+    private static boolean stringIsEmpty(String s) {
+        return s.isEmpty();
+    }
+
     // Hint:
     // <editor-fold defaultstate="collapsed">
     // Copy the lambda expression from the previous exercise and then pop
@@ -77,12 +81,12 @@ public class A_Lambdas {
      * Create a predicate that returns true if both predicates
      * startsWithJ and lengthIs7 hold.
      */
-    @Test @Ignore
+    @Test
     public void a_predicate4() {
         Predicate<String> startsWithJ = s -> s.startsWith("J");
         Predicate<String> lengthIs7 = s -> s.length() == 7;
 
-        Predicate<String> startsWithJAndLengthIs7 = null; // TODO
+        Predicate<String> startsWithJAndLengthIs7 = startsWithJ.and(lengthIs7);
 
         assertFalse(startsWithJAndLengthIs7.test("Hello"));
         assertFalse(startsWithJAndLengthIs7.test("HelloJ1"));
@@ -98,13 +102,13 @@ public class A_Lambdas {
      * Create a predicate that is true if the length of the provided string
      * is 9 or the provided string equals ERROR.
      */
-    @Test @Ignore
+    @Test
     public void a_predicate5() {
         Predicate<String> lengthIs9 = s -> s.length() == 9;
         Predicate<String> equalsError = "ERROR"::equals;
         // Note: this could also be: Predicate.isEqual("ERROR")
 
-        Predicate<String> lengthIs9orError = null; // TODO
+        Predicate<String> lengthIs9orError = lengthIs9.or(equalsError);
 
         assertFalse(lengthIs9orError.test("Hello"));
         assertTrue(lengthIs9orError.test("Hello J1!"));
@@ -120,9 +124,9 @@ public class A_Lambdas {
      * Write a lambda expression that wraps the given
      * string in parentheses.
      */
-    @Test @Ignore
+    @Test
     public void b_function1() {
-        Function<String, String> func = null; // TODO
+        Function<String, String> func = s -> "(" + s + ")";
 
         assertEquals("(abc)", func.apply("abc"));
     }
@@ -131,9 +135,9 @@ public class A_Lambdas {
      * Write a lambda expression that converts the
      * given string to upper case.
      */
-    @Test @Ignore
+    @Test
     public void b_function2() {
-        Function<String, String> func = null; // TODO
+        Function<String, String> func = s -> s.toUpperCase(Locale.ROOT);
 
         assertEquals("ABC", func.apply("abc"));
     }
@@ -142,11 +146,15 @@ public class A_Lambdas {
      * Write an unbound method reference that converts the
      * given string to upper case.
      */
-    @Test @Ignore
+    @Test
     public void b_function3() {
-        Function<String, String> func = null; // TODO
+        Function<String, String> func = A_Lambdas::stringToUpperCase;
 
         assertEquals("ABC", func.apply("abc"));
+    }
+
+    private static String stringToUpperCase(String s) {
+        return s.toUpperCase(Locale.ROOT);
     }
 
     /**
