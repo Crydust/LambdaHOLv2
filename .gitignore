@@ -14,3 +14,7 @@
 /LambdaLab/build/
 /LambdaLab/dist/
 /LambdaLab/nbproject/private/
+
+# Maven
+/LambdaLab/target/
+
