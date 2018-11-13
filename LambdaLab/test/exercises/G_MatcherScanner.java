@@ -1,24 +1,20 @@
 package exercises;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.util.regex.MatchResult;
-import java.util.Set;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -40,9 +36,12 @@ public class G_MatcherScanner {
      * been loaded into the String variable SONNET, using the Matcher class, and
      * process the results using a Stream.
      */
-    @Test @Ignore
+    @Test
     public void g1_wordsWithApostrophes() {
-        Set<String> result = null; // TODO
+        Set<String> result = WORD_PAT.matcher(SONNET)
+                .results()
+                .map(MatchResult::group)
+                .collect(Collectors.toSet());
 
         assertEquals(Set.of("Feed'st", "mak'st"), result);
     }
@@ -56,9 +55,12 @@ public class G_MatcherScanner {
      * Use the Scanner class to process the String variable SONNET, matching words as
      * described above using WORD_PAT.
      */
-    @Test @Ignore
+    @Test
     public void g2_wordsWithApostrophes() {
-        Set<String> result = null; // TODO
+        Set<String> result = new Scanner(SONNET)
+                .findAll(WORD_PAT)
+                .map(MatchResult::group)
+                .collect(Collectors.toSet());
 
         assertEquals(Set.of("Feed'st", "mak'st"), result);
     }
@@ -73,10 +75,14 @@ public class G_MatcherScanner {
      * the substring converted to upper case and surrounded by square brackets "[]".
      * Use the predefined pattern TRIGRAPH_PAT to match vowel trigraphs.
      */
-    @Test @Ignore
+    @Test
     public void g3_vowelTrigraphs() {
         final Pattern TRIGRAPH_PAT = Pattern.compile("[aeiou]{3}", Pattern.CASE_INSENSITIVE);
-        String result = null; // TODO
+
+        String result = TRIGRAPH_PAT.matcher(SONNET)
+                .replaceAll(r -> Matcher.quoteReplacement(
+                        "[" + r.group().toUpperCase() + "]"
+                ));
 
         assertTrue(result.contains("b[EAU]ty's"));
         assertEquals(614, result.length());
@@ -96,9 +102,13 @@ public class G_MatcherScanner {
      * but the advantage of Scanner is that it operate on a file, an InputStream,
      * or a Channel, and all the input need not be loaded into memory.)
      */
-    @Test @Ignore
+    @Test
     public void g4_firstLongWhitespaceSeparatedToken() {
-        String result = null; // TODO
+        String result = new Scanner(SONNET)
+                .tokens()
+                .filter(word -> word.length() >= 10)
+                .findFirst()
+                .orElse("");
 
         assertEquals("contracted", result);
     }
