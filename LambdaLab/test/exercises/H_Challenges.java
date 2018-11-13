@@ -1,9 +1,9 @@
 package exercises;
 
+import org.junit.Ignore;
+import org.junit.Test;
+
 import java.io.Serializable;
-import java.lang.reflect.Modifier;
-import java.util.AbstractMap;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -12,21 +12,17 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.RandomAccess;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.IntFunction;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.regex.MatchResult;
+import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import org.junit.Ignore;
-import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -57,7 +53,7 @@ public class H_Challenges {
      *     ...
      *   ]
      */
-    @Test @Ignore
+    @Test
     public void h1_denormalizeMap() {
         Map<Integer, List<String>> input = new HashMap<>();
         input.put(4, Arrays.asList("ibex", "hedgehog", "wombat"));
@@ -66,7 +62,13 @@ public class H_Challenges {
         input.put(10, Arrays.asList("crab", "lobster", "scorpion"));
         input.put(750, Arrays.asList("millipede"));
 
-        List<String> result = null; // TODO
+        List<String> result = input.entrySet().stream()
+                .flatMap(entry -> {
+                    final Integer legs = entry.getKey();
+                    final List<String> names = entry.getValue();
+                    return names.stream().map(name -> name + ":" + legs);
+                })
+                .collect(Collectors.toList());
 
         assertEquals(13, result.size());
         assertTrue(result.contains("ibex:4"));
@@ -121,7 +123,7 @@ public class H_Challenges {
      * pipeline (not counting nested streams), that is, in a single pass
      * over the input, without storing anything in a temporary collection.
      */
-    @Test @Ignore
+    @Test
     public void h2_invertMultiMap() {
         Map<String, Set<Integer>> input = new HashMap<>();
         input.put("a", new HashSet<>(Arrays.asList(1, 2)));
@@ -131,7 +133,46 @@ public class H_Challenges {
         input.put("e", new HashSet<>(Arrays.asList(2, 4)));
         input.put("f", new HashSet<>(Arrays.asList(3, 4)));
 
-        Map<Integer, Set<String>> result = null; // TODO
+        class Pair {
+            private final String key;
+            private final int value;
+            Pair(String key, int value) {
+                this.key = key;
+                this.value = value;
+            }
+            String getKey() {
+                return key;
+            }
+            int getValue() {
+                return value;
+            }
+        }
+
+        Map<Integer, Set<String>> result = input.entrySet().stream()
+                .flatMap(
+                        entry -> entry.getValue().stream()
+                                .map(value -> new Pair(entry.getKey(), value))
+                )
+                .collect(
+                        Collectors.groupingBy(
+                                Pair::getValue,
+                                Collectors.mapping(
+                                        Pair::getKey,
+                                        Collectors.toSet()
+                                )
+                        )
+                );
+
+
+        // honestly, I think the loop is easier to understand
+//        Map<Integer, Set<String>> result = new HashMap<>();
+//        for (Map.Entry<String, Set<Integer>> entry : input.entrySet()) {
+//            final String key = entry.getKey();
+//            for (Integer value : entry.getValue()) {
+//                result.computeIfAbsent(value, k -> new HashSet<>()).add(key);
+//            }
+//        }
+
 
         assertEquals(new HashSet<>(Arrays.asList("a", "c", "d")), result.get(1));
         assertEquals(new HashSet<>(Arrays.asList("a", "b", "e")), result.get(2));
@@ -150,7 +191,6 @@ public class H_Challenges {
     // is a pair of items. You can write your own pair class, or you can
     // use a pre-existing class like AbstractMap.SimpleEntry.
     // </editor-fold>
-
 
     /**
      * Select the longest words from an input stream. That is, select the words
@@ -186,11 +226,15 @@ public class H_Challenges {
      * similar to Python's itertools.groupby function, but it differs
      * from Java's Collectors.groupingBy() collector.
      */
-    @Test @Ignore
+    @Test
     public void h4_splitCharacterRuns() {
         String input = "aaaaabbccccdeeeeeeaaafff";
 
-        List<String> result = null; // TODO
+        List<String> result = Pattern.compile("(.)\\1*")
+                .matcher(input)
+                .results()
+                .map(MatchResult::group)
+                .collect(Collectors.toList());
 
         assertEquals("[aaaaa, bb, cccc, d, eeeeee, aaa, fff]", result.toString());
     }
@@ -244,7 +288,16 @@ public class H_Challenges {
      */
 
     OptionalInt majority(int[] array) {
-        return null; // TODO
+        return Arrays.stream(array)
+                .boxed()
+                .collect(Collectors.groupingBy(
+                        i -> i,
+                        Collectors.counting()))
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getValue() > array.length / 2)
+                .mapToInt(i -> i.getKey())
+                .findAny();
     }
     // Hint:
     // <editor-fold defaultstate="collapsed">
@@ -252,7 +305,7 @@ public class H_Challenges {
     // and a majority-finding pass.
     // </editor-fold>
 
-    @Test @Ignore
+    @Test
     public void h6_majority() {
         int[] array1 = { 13, 13, 24, 35, 24, 24, 35, 24, 24 };
         int[] array2 = { 13, 13, 24, 35, 24, 24, 35, 24 };
@@ -275,7 +328,7 @@ public class H_Challenges {
      * programming concept called "partial application."
      */
     Supplier<Shoe> makeShoeSupplier(IntFunction<Shoe> ifunc, int size) {
-        return null; // TODO
+        return () -> ifunc.apply(size);
     }
     // Hint:
     // <editor-fold defaultstate="collapsed">
@@ -292,7 +345,7 @@ public class H_Challenges {
         }
     }
 
-    @Test @Ignore
+    @Test
     public void h7_shoemaker() {
         Supplier<Shoe> sup1 = makeShoeSupplier(Shoe::new, 9);
         Supplier<Shoe> sup2 = makeShoeSupplier(Shoe::new, 13);
