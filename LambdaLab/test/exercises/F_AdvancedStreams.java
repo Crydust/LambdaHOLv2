@@ -1,33 +1,29 @@
 package exercises;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.IntSummaryStatistics;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
 import static java.util.Map.entry;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * This set of exercises covers advanced stream operations,
@@ -46,9 +42,11 @@ public class F_AdvancedStreams {
      *
      * @throws IOException
      */
-    @Test @Ignore
+    @Test
     public void f1_mapLengthToWordList() throws IOException {
-        Map<Integer, List<String>> result = null; // TODO
+        Map<Integer, List<String>> result = reader.lines()
+                .flatMap(SPLIT_PATTERN::splitAsStream)
+                .collect(Collectors.groupingBy(String::length));
 
         assertEquals(10, result.get(7).size());
         assertEquals(Set.of("beauty's", "increase", "ornament"), new HashSet<>(result.get(8)));
@@ -72,9 +70,22 @@ public class F_AdvancedStreams {
      *
      * @throws IOException
      */
-    @Test @Ignore
+    @Test
     public void f2_mapLengthToWordCount() throws IOException {
-        Map<Integer, Long> result = null; // TODO
+//        Map<Integer, Long> result = reader.lines()
+//                .flatMap(SPLIT_PATTERN::splitAsStream)
+//                .collect(Collectors.groupingBy(String::length))
+//                .entrySet()
+//                .stream()
+//                .collect(Collectors.toMap(
+//                        entry -> entry.getKey(),
+//                        entry -> (long)entry.getValue().size()
+//                ));
+
+        Map<Integer, Long> result =
+                reader.lines()
+                        .flatMap(SPLIT_PATTERN::splitAsStream)
+                        .collect(Collectors.groupingBy(String::length, Collectors.counting()));
 
         assertEquals(Map.ofEntries(entry( 1,  1L),
                                    entry( 2, 11L),
@@ -108,9 +119,22 @@ public class F_AdvancedStreams {
      *
      * @throws IOException
      */
-    @Test @Ignore
+    @Test
     public void f3_wordFrequencies() throws IOException {
-        Map<String, Long> result = null; // TODO
+//        Map<String, Long> result = reader.lines()
+//                .flatMap(SPLIT_PATTERN::splitAsStream)
+//                .collect(Collectors.groupingBy(
+//                        (it) -> it,
+//                        Collectors.counting()
+//                ));
+
+        Map<String, Long> result = reader.lines()
+                .flatMap(SPLIT_PATTERN::splitAsStream)
+                .collect(Collectors.toMap(
+                        (it) -> it,
+                        (it) -> 1L,
+                        (a, b) -> a + b
+                ));
 
         assertEquals(2L, (long)result.get("tender"));
         assertEquals(6L, (long)result.get("the"));
@@ -147,9 +171,14 @@ public class F_AdvancedStreams {
      *
      * @throws IOException
      */
-    @Test @Ignore
+    @Test
     public void f4_nestedMaps() throws IOException {
-        Map<String, Map<Integer, List<String>>> result = null; // TODO
+        Map<String, Map<Integer, List<String>>> result = reader.lines()
+                .flatMap(SPLIT_PATTERN::splitAsStream)
+                .collect(Collectors.groupingBy(
+                        (it) -> it.substring(0, 1),
+                        Collectors.groupingBy(String::length)
+                ));
 
         assertEquals("[abundance]", result.get("a").get(9).toString());
         assertEquals("[by, be, by]", result.get("b").get(2).toString());
@@ -177,12 +206,34 @@ public class F_AdvancedStreams {
      * in this stream. Since the input is a stream, this necessitates making a single
      * pass over the input.
      */
-    @Test @Ignore
+    @Test
     public void f5_separateOddEvenSums() {
         IntStream input = new Random(987523).ints(20, 0, 100);
 
-        int sumEvens = 0; // TODO
-        int sumOdds  = 0; // TODO
+//        int e = 0;
+//        int o = 0;
+//        for (int i : input.toArray()) {
+//            if (i%2==0) e+=i;
+//            else o+=i;
+//        }
+
+//        final Map<Boolean, Integer> collect1 = input
+//                .boxed()
+//                .collect(Collectors.groupingBy(
+//                        (i) -> i % 2 == 0,
+//                        Collectors.summingInt(i -> i)
+//                ));
+
+        final Map<Boolean, Integer> collect2 = input
+                .boxed()
+                .collect(Collectors.partitioningBy(
+                        (i) -> i % 2 == 0,
+                        Collectors.summingInt(i -> i)
+                ));
+
+
+        int sumEvens = collect2.get(true);
+        int sumOdds  = collect2.get(false);
 
         assertEquals(516, sumEvens);
         assertEquals(614, sumOdds);
@@ -212,6 +263,7 @@ public class F_AdvancedStreams {
             "k", "l", "m", "n", "o", "p", "q", "r", "s", "t")
             .parallelStream();
 
+        // nope, can't find this
         String result = input.collect(null, null, null).toString();
         // TODO fill in lambda expressions or method references
         // in place of the nulls in the line above.
